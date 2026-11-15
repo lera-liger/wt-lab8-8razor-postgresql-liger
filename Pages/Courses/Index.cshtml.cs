@@ -1,28 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using Microsoft.EntityFrameworkCore;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Courses;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Courses;
 
 public class IndexModel : PageModel
 {
-    public List<Course> Courses { get; set; } = new();
+    private readonly AppDbContext _context;
 
-    public void OnGet()
+    public IndexModel(AppDbContext context)
     {
-        Courses = CourseStore.Courses;
+        _context = context;
     }
 
-    public IActionResult OnPostDelete(int id)
-    {
-        var course = CourseStore.Courses.FirstOrDefault(c => c.Id == id);
+    public List<Course> Courses { get; set; } = new();
 
+    public async Task OnGetAsync()
+    {
+        Courses = await _context.Courses
+            .OrderBy(c => c.Id)
+            .ToListAsync();
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var course = await _context.Courses.FindAsync(id);
         if (course != null)
         {
-            CourseStore.Courses.Remove(course);
+            _context.Courses.Remove(course);
+            await _context.SaveChangesAsync();
         }
-
         return RedirectToPage("./Index");
     }
 }

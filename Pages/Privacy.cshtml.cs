@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace wt_lab5_5razor_liger.Pages;
+namespace wt_lab8_8razor_postgresql_liger.Pages;
 
 public class PrivacyModel : PageModel
 {

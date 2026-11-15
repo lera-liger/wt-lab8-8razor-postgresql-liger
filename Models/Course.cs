@@ -1,24 +1,24 @@
-п»їusing System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace wt_lab5_5razor_liger.Models;
+namespace wt_lab8_8razor_postgresql_liger.Models;
 
 public class Course
 {
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Р’РІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёРµ РєСѓСЂСЃР°")]
+    [Required(ErrorMessage = "Введите название курса")]
     [StringLength(100, MinimumLength = 2)]
-    [Display(Name = "РќР°Р·РІР°РЅРёРµ РєСѓСЂСЃР°")]
+    [Display(Name = "Название курса")]
     public string Title { get; set; } = string.Empty;
 
-    [Range(1, 4, ErrorMessage = "РЎРµРјРµСЃС‚СЂ РѕС‚ 1 РґРѕ 4")]
-    [Display(Name = "РЎРµРјРµСЃС‚СЂ")]
+    [Range(1, 4, ErrorMessage = "Семестр от 1 до 4")]
+    [Display(Name = "Семестр")]
     public int Semester { get; set; }
 
-    [Range(1, 300, ErrorMessage = "РљРѕР»РёС‡РµСЃС‚РІРѕ С‡Р°СЃРѕРІ РѕС‚ 1 РґРѕ 300")]
-    [Display(Name = "Р§Р°СЃС‹")]
+    [Range(1, 300, ErrorMessage = "Количество часов от 1 до 300")]
+    [Display(Name = "Часы")]
     public int Hours { get; set; }
 
-    [Display(Name = "РџСЂРµРїРѕРґР°РІР°С‚РµР»СЊ")]
+    [Display(Name = "Преподаватель")]
     public int TeacherId { get; set; }   
 }

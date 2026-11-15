@@ -1,29 +1,54 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using Microsoft.EntityFrameworkCore;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Students;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Students;
 
 public class IndexModel : PageModel
 {
-    public List<Student> Students { get; set; } = new();
+    private readonly AppDbContext _context;
 
-    public void OnGet()
+    public IndexModel(AppDbContext context)
     {
-        Students = StudentStore.Students;
+        _context = context;
     }
 
-    // Обработчик удаления из списка
-    public IActionResult OnPostDelete(int id)
-    {
-        var student = StudentStore.Students.FirstOrDefault(s => s.Id == id);
+    // Свойство для поиска (поддерживает GET-запрос)
+    [BindProperty(SupportsGet = true)]
+    public string? Search { get; set; }
 
-        if (student != null)
+    public List<Student> Students { get; set; } = new();
+
+    public async Task OnGetAsync()
+    {
+        // Базовый запрос к БД
+        var query = _context.Students.AsQueryable();
+
+        // Если введен поиск — фильтруем по ФИО или специальности
+        if (!string.IsNullOrWhiteSpace(Search))
         {
-            StudentStore.Students.Remove(student);
+            query = query.Where(s =>
+                s.FullName.Contains(Search) ||
+                s.Specialty.Contains(Search));
         }
 
+        // Сортировка и выполнение запроса
+        Students = await query
+            .OrderBy(s => s.Id)
+            .ToListAsync();
+    }
+
+    // Обработчик удаления (если используется на странице)
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var student = await _context.Students.FindAsync(id);
+        if (student != null)
+        {
+            _context.Students.Remove(student);
+            await _context.SaveChangesAsync();
+        }
         return RedirectToPage("./Index");
     }
 }

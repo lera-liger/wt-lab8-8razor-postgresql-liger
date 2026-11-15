@@ -1,25 +1,33 @@
-п»їusing Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using Microsoft.EntityFrameworkCore;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Courses;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Courses;
 
 public class DetailsModel : PageModel
 {
+    private readonly AppDbContext _context;
+
+    public DetailsModel(AppDbContext context)
+    {
+        _context = context;
+    }
+
     public Course? Course { get; set; }
     public string TeacherName { get; set; } = string.Empty;
 
-    public IActionResult OnGet(int id)
+    public async Task<IActionResult> OnGetAsync(int? id)
     {
-        Course = CourseStore.Courses.FirstOrDefault(c => c.Id == id);
+        if (id == null) return NotFound();
 
-        if (Course == null)
-        {
-            return NotFound();
-        }
+        Course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == id);
 
-        var teacher = TeacherStore.Teachers.FirstOrDefault(t => t.Id == Course.TeacherId);
+        if (Course == null) return NotFound();
+
+        // Ищем преподавателя по TeacherId
+        var teacher = await _context.Teachers.FindAsync(Course.TeacherId);
         if (teacher != null)
         {
             TeacherName = teacher.FullName;
@@ -28,15 +36,14 @@ public class DetailsModel : PageModel
         return Page();
     }
 
-    public IActionResult OnPostDelete(int id)
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
-        var course = CourseStore.Courses.FirstOrDefault(c => c.Id == id);
-
+        var course = await _context.Courses.FindAsync(id);
         if (course != null)
         {
-            CourseStore.Courses.Remove(course);
+            _context.Courses.Remove(course);
+            await _context.SaveChangesAsync();
         }
-
         return RedirectToPage("./Index");
     }
 }

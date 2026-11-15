@@ -1,17 +1,31 @@
-п»їusing Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using Microsoft.EntityFrameworkCore;
+using wt_lab5_5razor_lisger.Models;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Teachers;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Teachers;
 
 public class DetailsModel : PageModel
 {
+    private readonly AppDbContext _context;
+
+    public DetailsModel(AppDbContext context)
+    {
+        _context = context;
+    }
+
     public Teacher? Teacher { get; set; }
 
-    public IActionResult OnGet(int id)
+    public async Task<IActionResult> OnGetAsync(int? id)
     {
-        Teacher = TeacherStore.Teachers.FirstOrDefault(t => t.Id == id);
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        Teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == id);
 
         if (Teacher == null)
         {
@@ -21,15 +35,15 @@ public class DetailsModel : PageModel
         return Page();
     }
 
-    public IActionResult OnPostDelete(int id)
+    // Обработчик удаления
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
-        var teacher = TeacherStore.Teachers.FirstOrDefault(t => t.Id == id);
-
+        var teacher = await _context.Teachers.FindAsync(id);
         if (teacher != null)
         {
-            TeacherStore.Teachers.Remove(teacher);
+            _context.Teachers.Remove(teacher);
+            await _context.SaveChangesAsync();
         }
-
         return RedirectToPage("./Index");
     }
 }

@@ -1,40 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Students;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Students;
 
 public class CreateModel : PageModel
 {
-    // [BindProperty] связывает поля формы с этим свойством
-    [BindProperty]
-    public Student Student { get; set; } = new();
+    private readonly AppDbContext _context;
 
-    // GET: /Students/Create
-    public void OnGet()
+    public CreateModel(AppDbContext context)
     {
-        // Ничего не делаем — просто показываем пустую форму
+        _context = context;
     }
 
-    // POST: /Students/Create
-    public IActionResult OnPost()
+    [BindProperty]
+    public Student Student { get; set; } = new(); // <-- ��� ����� �������� �� �������
+
+    public void OnGet()
     {
-        // Если валидация не прошла — возвращаем форму с ошибками
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
         if (!ModelState.IsValid)
         {
             return Page();
         }
 
-        // Генерируем новый ID
-        Student.Id = StudentStore.Students.Any()
-            ? StudentStore.Students.Max(s => s.Id) + 1
-            : 1;
+        _context.Students.Add(Student);
+        await _context.SaveChangesAsync();
 
-        // Добавляем в общее хранилище
-        StudentStore.Students.Add(Student);
-
-        // Перенаправляем на список
         return RedirectToPage("./Index");
     }
 }

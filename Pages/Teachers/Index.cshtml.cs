@@ -1,28 +1,38 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using Microsoft.EntityFrameworkCore;
+using wt_lab5_5razor_lisger.Models;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Teachers;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Teachers;
 
 public class IndexModel : PageModel
 {
-    public List<Teacher> Teachers { get; set; } = new();
+    private readonly AppDbContext _context;
 
-    public void OnGet()
+    public IndexModel(AppDbContext context)
     {
-        Teachers = TeacherStore.Teachers;
+        _context = context;
     }
 
-    public IActionResult OnPostDelete(int id)
-    {
-        var teacher = TeacherStore.Teachers.FirstOrDefault(t => t.Id == id);
+    public List<Teacher> Teachers { get; set; } = new();
 
+    public async Task OnGetAsync()
+    {
+        Teachers = await _context.Teachers
+            .OrderBy(t => t.Id)
+            .ToListAsync();
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var teacher = await _context.Teachers.FindAsync(id);
         if (teacher != null)
         {
-            TeacherStore.Teachers.Remove(teacher);
+            _context.Teachers.Remove(teacher);
+            await _context.SaveChangesAsync();
         }
-
         return RedirectToPage("./Index");
     }
 }

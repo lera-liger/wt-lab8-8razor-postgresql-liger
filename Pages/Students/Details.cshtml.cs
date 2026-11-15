@@ -1,36 +1,41 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using wt_lab5_5razor_liger.Data;
-using wt_lab5_5razor_liger.Models;
+using Microsoft.EntityFrameworkCore;
+using wt_lab8_8razor_postgresql_liger.Data;
+using wt_lab8_8razor_postgresql_liger.Models;
 
-namespace wt_lab5_5razor_liger.Pages.Students;
+namespace wt_lab8_8razor_postgresql_liger.Pages.Students;
 
 public class DetailsModel : PageModel
 {
+    private readonly AppDbContext _context;
+
+    public DetailsModel(AppDbContext context)
+    {
+        _context = context;
+    }
+
     public Student? Student { get; set; }
 
-    public IActionResult OnGet(int id)
+    public async Task<IActionResult> OnGetAsync(int? id)
     {
-        Student = StudentStore.Students.FirstOrDefault(s => s.Id == id);
+        if (id == null) return NotFound();
 
-        if (Student == null)
-        {
-            return NotFound();
-        }
+        Student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
+
+        if (Student == null) return NotFound();
 
         return Page();
     }
 
-    // Обработчик удаления со страницы Details
-    public IActionResult OnPostDelete(int id)
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
-        var student = StudentStore.Students.FirstOrDefault(s => s.Id == id);
-
+        var student = await _context.Students.FindAsync(id);
         if (student != null)
         {
-            StudentStore.Students.Remove(student);
+            _context.Students.Remove(student);
+            await _context.SaveChangesAsync();
         }
-
         return RedirectToPage("./Index");
     }
 }
