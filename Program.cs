@@ -3,22 +3,26 @@ using wt_lab8_8razor_postgresql_liger.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddRazorPages();
 
+// Получаем строку подключения из appsettings.json (для локальной разработки)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
 
+// Проверяем наличие переменной DATABASE_URL (для Render)
 var databaseUrl = builder.Configuration["DATABASE_URL"];
 if (!string.IsNullOrWhiteSpace(databaseUrl))
 {
-    // Преобразуем URL от Render в строку подключения Npgsql
+    // Парсим URL, который предоставляет Render
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':', 2);
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={Uri.UnescapeDataString(userInfo[0])};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Disable";
+
+    // Если порт не указан в URL (Render часто его опускает), используем стандартный 5432
+    var port = uri.Port > 0 ? uri.Port : 5432;
+
+    connectionString = $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.TrimStart('/')};Username={Uri.UnescapeDataString(userInfo[0])};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Disable";
 }
 
-// Регистрируем AppDbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
