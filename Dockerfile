@@ -1,22 +1,14 @@
-﻿FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿# Добавьте эту строку в начало
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-
-ENV DOTNET_EnableWriteXorExecute=0
-
 COPY *.csproj ./
 RUN dotnet restore
-
 COPY . ./
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-
 COPY --from=build /app/publish .
-
 ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 EXPOSE 10000
-
 ENTRYPOINT ["dotnet", "wt-lab8-8razor-postgresql-liger.dll"]
