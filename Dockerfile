@@ -1,4 +1,4 @@
-﻿# Добавьте эту строку в начало
+﻿# Добавьте эту строку в самое начало
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY *.csproj ./
