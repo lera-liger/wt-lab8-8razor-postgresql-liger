@@ -13,14 +13,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var databaseUrl = builder.Configuration["DATABASE_URL"];
 if (!string.IsNullOrWhiteSpace(databaseUrl))
 {
-    // Парсим URL, который предоставляет Render
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':', 2);
 
-    // Если порт не указан в URL (Render часто его опускает), используем стандартный 5432
-    var port = uri.Port > 0 ? uri.Port : 5432;
+    // Переименовали port в dbPort
+    var dbPort = uri.Port > 0 ? uri.Port : 5432;
 
-    connectionString = $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.TrimStart('/')};Username={Uri.UnescapeDataString(userInfo[0])};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Disable";
+    connectionString = $"Host={uri.Host};Port={dbPort};Database={uri.AbsolutePath.TrimStart('/')};Username={Uri.UnescapeDataString(userInfo[0])};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Disable";
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
